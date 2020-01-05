@@ -1,19 +1,23 @@
 import os
-import random
-import string
 import cherrypy
 import redis
 import json
 from scrap import scrap
 
-# db = redis.StrictRedis('localhost', 6379, charset="utf-8", decode_responses=True)
-db = redis.from_url(os.environ.get("REDIS_URL"))
+db = redis.StrictRedis('localhost', 6379, charset="utf-8", decode_responses=True)
+# db = redis.from_url(os.environ.get("REDIS_URL"), 'redis://127.0.0.1:6379/12')
 
 
 class WebService(object):
+    """
+    CherryPy class which to serve HTML file ans Stock Data
+    """
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def data(self):
+        """
+        fetches stock data from db
+        """
         l = list(db.smembers("data"))
         for i in range(len(l)):
             l[i] = json.loads(l[i])
@@ -24,6 +28,9 @@ class WebService(object):
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def update(self):
+        """
+        Update stock data by scrapping latest copy
+        """
         count = scrap()
         if count:
             dic = {
@@ -39,6 +46,9 @@ class WebService(object):
         
     @cherrypy.expose
     def index(self):
+        """
+        renders html view page
+        """
         return open("./index.html", "r").read()
 
 

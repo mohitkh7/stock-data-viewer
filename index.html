@@ -3,12 +3,9 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Stock Data</title>
+    <title>Stock Data Viewer</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
     <style>
-      .container{
-        margin-top:60px;
-      }
       .button-wrapper{
         text-align: right;
         margin-top: 15px;
@@ -16,19 +13,28 @@
     </style>
   </head>
   <body>
-    <nav class="navbar navbar-inverse navbar-fixed-top">
+    <!-- Navbar -->
+    <nav class="navbar navbar-inverse">
       <div class="container-fluid">
         <div class="navbar-header">
-          <a class="navbar-brand" href="#">Stock Data</a>
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>                        
+          </button>
+          <a class="navbar-brand" href="#">Stock Data Viewer</a>
         </div>
-        <ul class="nav navbar-nav navbar-right">
-          <li><a href="https://github.com/mohitkh7" target="blank"> View Source Code</a></li>
-        </ul>
+        <div class="collapse navbar-collapse" id="myNavbar">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="https://github.com/mohitkh7/stock-data-viewer" target="blank"> View Source Code</a></li>
+          </ul>
+        </div>
       </div>
     </nav>
     <div class="container" data-ng-app="app" data-ng-controller="stock">
       <h3>Stock Data</h3>
       <hr>
+      <!-- alert message section -->
       <div ng-if="is_success || is_error">
         <div ng-class="is_success ? 'alert alert-success alert-dismissible': 'alert alert-danger alert-dismissible'">
           <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
@@ -36,6 +42,7 @@
         </div>
       </div>
 
+      <!-- table options -->
       <div class="form-group row">
         <div class="col-xs-6 col-md-4 col-lg-3">
           <label for="filter_text" class="control-label">Filter Records by Share Name : </label>
@@ -45,31 +52,35 @@
           <button class="btn btn-primary" ng-disabled="is_btn_disable" ng-click="updateStockData()">Fetch Latest Data</button>
         </div>
       </div>
-      <table class="table table-condensed table-bordered table-hover table-striped">
-        <thead>
-          <tr>
-            <th>Stock Code</th>
-            <th>Stock Name</th>
-            <th>Open</th>
-            <th>High</th>
-            <th>Low</th>
-            <th>Close</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr data-ng-repeat="s in stock | limitTo : limit">
-            <td>{{ s.CODE }}</td>
-            <td>{{ s.NAME }}</td>
-            <td>{{ s.OPEN }}</td>
-            <td>{{ s.HIGH }}</td>
-            <td>{{ s.LOW }}</td>
-            <td>{{ s.CLOSE }}</td>
-          </tr>
-          <tr ng-if="stock.length == 0">
-            <td colspan="6" class="text-center text-danger">No Stock Record Found</td>
-          </tr>
-        </tbody>
-      </table>
+
+      <!-- data table -->
+      <div class="table-responsive">
+        <table class="table table-condensed table-hover table-striped">
+          <thead>
+            <tr>
+              <th>Stock Code</th>
+              <th>Stock Name</th>
+              <th>Open</th>
+              <th>High</th>
+              <th>Low</th>
+              <th>Close</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr data-ng-repeat="s in stock | limitTo : limit">
+              <td>{{ s.CODE }}</td>
+              <td>{{ s.NAME }}</td>
+              <td>{{ s.OPEN }}</td>
+              <td>{{ s.HIGH }}</td>
+              <td>{{ s.LOW }}</td>
+              <td>{{ s.CLOSE }}</td>
+            </tr>
+            <tr ng-if="stock.length == 0">
+              <td colspan="6" class="text-center text-danger">No Stock Record Found</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <p class="text-muted text-right" ng-if="stock.length">Showing {{ limit < stock.length ? limit: stock.length }} out {{ allstock.length }} Results</p>
     </div>
   </body>
@@ -90,6 +101,7 @@
 
       $scope.getStockData = function(){
         // make API call to get stock data
+        $scope.is_error = false;
         $http({
           url: URL,
           method: "GET",
@@ -99,15 +111,18 @@
           console.log(JSON.parse(resp.data).length + " stock records fetched");
           $scope.filter();
         }, function(err){
-          console.log("Error occured while fetching stock data");
+          $scope.stock = [];
+          $scope.is_error = true;
+          $scope.alert_message = "Error occured while fetching stock data";
+          console.log($scope.alert_message);
         });
       }
 
       $scope.updateStockData = function() {
+        // make API call to update to latest stock data
         $scope.is_error = false;
         $scope.is_success = false;
         $scope.is_btn_disable = true;
-        // make API call to fetch latest stock data
         $http({
           url: "/update",
           method: "GET",
@@ -141,14 +156,12 @@
         $scope.stock = $scope.allstock.filter(el => { return el["NAME"].includes($scope.filter_text.toUpperCase())});
       }
 
-      // on page init 
+      // execute on initalization(load) of page
       angular.element(function () {
         $scope.getStockData();
       });
 
     });
-
-    
   </script>
 
 </html>

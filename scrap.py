@@ -1,10 +1,12 @@
-from urllib.request import urlopen
-from io import BytesIO
-from zipfile import ZipFile
 import re
 import requests
 import redis
 import json
+import os
+from urllib.request import urlopen
+from io import BytesIO
+from zipfile import ZipFile
+
 
 
 def scrap():

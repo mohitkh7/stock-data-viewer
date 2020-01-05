@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Stock Data</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <style>
+      .container{
+        margin-top:60px;
+      }
+      .button-wrapper{
+        text-align: right;
+        margin-top: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#">Stock Data</a>
+        </div>
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="https://github.com/mohitkh7" target="blank"> View Source Code</a></li>
+        </ul>
+      </div>
+    </nav>
+    <div class="container" data-ng-app="app" data-ng-controller="stock">
+      <h3>Stock Data</h3>
+      <hr>
+      <div ng-if="is_success || is_error">
+        <div ng-class="is_success ? 'alert alert-success alert-dismissible': 'alert alert-danger alert-dismissible'">
+          <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+          {{ alert_message }}
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <div class="col-xs-6 col-md-4 col-lg-3">
+          <label for="filter_text" class="control-label">Filter Records by Share Name : </label>
+          <input class="form-control" id="filter_text" type="text" placeholder="stock name"ng-model="filter_text" ng-change="filter()">
+        </div>
+        <div class="col-xs-6 col-md-offset-4 col-md-4 col-lg-offset-6 col-lg-3 button-wrapper">
+          <button class="btn btn-primary" ng-disabled="is_btn_disable" ng-click="updateStockData()">Fetch Latest Data</button>
+        </div>
+      </div>
+      <table class="table table-condensed table-bordered table-hover table-striped">
+        <thead>
+          <tr>
+            <th>Stock Code</th>
+            <th>Stock Name</th>
+            <th>Open</th>
+            <th>High</th>
+            <th>Low</th>
+            <th>Close</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-ng-repeat="s in stock | limitTo : limit">
+            <td>{{ s.CODE }}</td>
+            <td>{{ s.NAME }}</td>
+            <td>{{ s.OPEN }}</td>
+            <td>{{ s.HIGH }}</td>
+            <td>{{ s.LOW }}</td>
+            <td>{{ s.CLOSE }}</td>
+          </tr>
+          <tr ng-if="stock.length == 0">
+            <td colspan="6" class="text-center text-danger">No Stock Record Found</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="text-muted text-right" ng-if="stock.length">Showing {{ limit < stock.length ? limit: stock.length }} out {{ allstock.length }} Results</p>
+    </div>
+  </body>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+  <script>
+    var app = angular.module('app', []);
+    app.controller('stock', function($scope, $http) {
+      const URL = "http://localhost:8000/data";
+      $scope.filter_text = "";
+      $scope.limit = 10;
+      $scope.is_btn_disable = false;
+      $scope.is_success = false;
+      $scope.is_error = false;
+      $scope.alert_message = "";
+
+      $scope.getStockData = function(){
+        // make API call to get stock data
+        $http({
+          url: URL,
+          method: "GET",
+        })
+        .then(function(resp){
+          $scope.allstock = JSON.parse(resp.data);
+          console.log(JSON.parse(resp.data).length + " stock records fetched");
+          $scope.filter();
+        }, function(err){
+          console.log("Error occured while fetching stock data");
+        });
+      }
+
+      $scope.updateStockData = function() {
+        $scope.is_error = false;
+        $scope.is_success = false;
+        $scope.is_btn_disable = true;
+        // make API call to fetch latest stock data
+        $http({
+          url: "/update",
+          method: "GET",
+        })
+        .then(function(resp){
+          data = JSON.parse(resp.data);
+          console.log(data["message"]);
+          if (data["status"] == 1) {
+            $scope.is_success = true;
+            $scope.getStockData();
+          }
+          else
+            $scope.is_error = true;
+
+          $scope.is_btn_disable = false;
+          $scope.alert_message = data["message"];
+
+        }, function(err){
+          console.log("Error occured while updating stock data");
+          $scope.is_btn_disable = false;
+          $scope.is_error = true;
+          $scope.alert_message = "Error occured while updating stock data";
+        });
+      }
+      
+
+      
+
+      // filter stock by name
+      $scope.filter = function(arr) {
+        $scope.stock = $scope.allstock.filter(el => { return el["NAME"].includes($scope.filter_text.toUpperCase())});
+      }
+
+      // on page init 
+      angular.element(function () {
+        $scope.getStockData();
+      });
+
+    });
+
+    
+  </script>
+
+</html>

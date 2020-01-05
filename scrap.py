@@ -10,7 +10,7 @@ import json
 def scrap():
     print("Fetching Data ...")
     try:
-        db = redis.Redis()
+        db = redis.from_url(os.environ.get("REDIS_URL"))
         stock_count = 0
         URL = "https://www.bseindia.com/markets/MarketInfo/BhavCopy.aspx"
         website = urlopen(URL)

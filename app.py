@@ -6,12 +6,9 @@ import redis
 import json
 from scrap import scrap
 
-db = redis.StrictRedis('localhost', 6379, charset="utf-8", decode_responses=True)
+# db = redis.StrictRedis('localhost', 6379, charset="utf-8", decode_responses=True)
+db = redis.from_url(os.environ.get("REDIS_URL"))
 
-global_conf = {
-    "server.socket_port": 8000,
-}
-cherrypy.config.update(global_conf)
 
 class WebService(object):
     @cherrypy.expose

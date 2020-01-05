@@ -80,7 +80,7 @@
   <script>
     var app = angular.module('app', []);
     app.controller('stock', function($scope, $http) {
-      const URL = "http://localhost:8000/data";
+      const URL = "/data";
       $scope.filter_text = "";
       $scope.limit = 10;
       $scope.is_btn_disable = false;

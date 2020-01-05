@@ -4,8 +4,8 @@ import redis
 import json
 from scrap import scrap
 
-db = redis.StrictRedis('localhost', 6379, charset="utf-8", decode_responses=True)
-# db = redis.from_url(os.environ.get("REDIS_URL"), 'redis://127.0.0.1:6379/12')
+# db = redis.StrictRedis('localhost', 6379, charset="utf-8", decode_responses=True)
+db = redis.from_url(os.environ.get("REDIS_URL"))
 
 
 class WebService(object):

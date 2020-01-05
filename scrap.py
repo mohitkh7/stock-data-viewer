@@ -16,8 +16,8 @@ def scrap():
 
     print("Fetching Data ...")
     try:
-        # db = redis.from_url(os.environ.get("REDIS_URL"))
-        db = redis.Redis()
+        db = redis.from_url(os.environ.get("REDIS_URL"))
+        # db = redis.Redis()
         stock_count = 0
         website = urlopen(URL)
         if website.status == 200:
